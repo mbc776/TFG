@@ -1,16 +1,23 @@
 package ventana;
-
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+
+
+
 
 /**
  * Clase Ventana
@@ -20,10 +27,14 @@ import javax.swing.JTextField;
  */
 public class Ventana extends JFrame implements ActionListener {
 
-	private JLabel texto;           // etiqueta o texto no editable
-	private JTextField caja;        // caja de texto, para insertar datos
-	private JButton botonWindows;          // boton con una determinada accion
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JFrame frame;
+	private JButton botonWindows;
 	private JButton botonUbuntu;
+	
 
 	public Ventana() {
 		super();                    // usamos el contructor de la clase padre JFrame
@@ -38,13 +49,16 @@ public class Ventana extends JFrame implements ActionListener {
 		this.setUndecorated(true);
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);                       // centramos la ventana en la pantalla
+
 		this.setBackground(new Color(100,50,20));
-		this.setLayout(null);                                   // no usamos ningun layout, solo asi podremos dar posiciones a los componentes
+		getContentPane().setLayout(null);                                   // no usamos ningun layout, solo asi podremos dar posiciones a los componentes
 		this.setResizable(true);                               // hacemos que la ventana no sea redimiensionable
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);    // hacemos que cuando se cierre la ventana termina todo proceso
 	}
 
 	private void inicializarComponentes() {
+		/*background=new ImageIcon("UC.jpg").getImage();
+		
 		// creamos los componentes
 		texto = new JLabel();
 		caja = new JTextField();
@@ -60,57 +74,159 @@ public class Ventana extends JFrame implements ActionListener {
 		botonUbuntu.setText("Ubuntu");   // colocamos un texto al boton
 		botonUbuntu.setBounds(600, 300, 200, 100);  // colocamos posicion y tamanio al boton (x, y, ancho, alto)
 		botonUbuntu.addActionListener(this);      // hacemos que el boton tenga una accion y esa accion estara en esta clase
-		// adicionamos los componentes a la ventana
-		//this.add(texto);
-		//this.add(caja);
 		this.add(botonWindows);
-		this.add(botonUbuntu);
+		this.add(botonUbuntu);*/
+		frame = new JFrame();
+		frame.setBounds(100, 100, 588, 457);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		frame.setUndecorated(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		JPanel panel = new JPanel();
+		panel.setBackground(Color.CYAN);
+		panel.setForeground(Color.BLACK);
+		frame.getContentPane().add(panel, BorderLayout.CENTER);
+		panel.setLayout(null);
+		
+		botonUbuntu = new JButton("Ubuntu");
+		botonUbuntu.setBounds(800, 510, 163, 92);
+		botonUbuntu.addActionListener(this);
+		botonUbuntu.createImage(163, 92);
+		panel.add(botonUbuntu);
+		
+		botonWindows = new JButton("Windows");
+		botonWindows.setBounds(1100, 508, 163, 92);
+		botonWindows.addActionListener(this);
+		panel.add(botonWindows);
+		JLabel label = new JLabel(new ImageIcon("images/UC.jpg"));
+		label.setBounds(1500, 100, 1528, 1173);
+		panel.add(label);
+		
+		JButton botonExit = new JButton("X");
+		botonExit.setBackground(Color.RED);
+		botonExit.setBounds(1800, 0, 130, 40);
+		panel.add(botonExit);
+		botonExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(WIDTH);
+			}
+		});
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource().equals(botonWindows)){
-
-			//String nombre = caja.getText();                                 // obtenemos el contenido de la caja de texto
-			//JOptionPane.showMessageDialog(this, "Has seleccionado Windows");    // mostramos un mensaje (frame, mensaje)
+			String user = "root";
+			String password = "temporal";
+			String host = "192.168.0.20";
+			int port = 22;
+			Session session = null;
+		    ChannelExec channel = null;
+		    
+		    try {
+		        session = new JSch().getSession(user, host, port);
+		        session.setPassword(password);
+		        session.setConfig("StrictHostKeyChecking", "no");
+		        System.out.println("Establishing Connection...");
+		        session.connect();
+		        System.out.println("Connection established.");
+		        
+		        channel = (ChannelExec) session.openChannel("exec");
+		        channel.setCommand("xe vm-start uuid=0e8aaa5b-5332-2231-90bf-5d74541259eb");
+		        ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+		        channel.setOutputStream(responseStream);
+		        System.out.println("Crating SFTP Channel.");
+		        channel.connect();
+		        System.out.println("SFTP Channel created.");
+		        
+		        while (channel.isConnected()) {
+		            Thread.sleep(100);
+		        }
+		        
+		        String responseString = new String(responseStream.toByteArray());
+		        System.out.println(responseString);
+		        //channel.disconnect();
+		        //session.disconnect();
+		    } catch(Exception ex){
+		    	
+		    }
 			String s;
-	        Process p;
-	        try {
-	            //p = Runtime.getRuntime().exec("remmina -c /home/mario/.local/share/remmina/windows.remmina");
-	            p = Runtime.getRuntime().exec("ssh root@192.168.0.20");
-	            p = Runtime.getRuntime().exec("temporal");
-	            p = Runtime.getRuntime().exec("xe vm-start uuid=0e8aaa5b-5332-2231-90bf-5d74541259eb");
-	            BufferedReader br = new BufferedReader(
-	                new InputStreamReader(p.getInputStream()));
-	            while ((s = br.readLine()) != null)
-	                System.out.println("line: " + s);
-	            p.waitFor();
-	            System.out.println ("exit: " + p.exitValue());
-	            p.destroy();
-	        } catch (Exception ex) {}
-		}
+			Process p;
+				try {
+					Thread.sleep(10000);
+					p = Runtime.getRuntime().exec("remmina -c /home/mario/.local/share/remmina/windows.remmina");
+					BufferedReader br = new BufferedReader(
+							new InputStreamReader(p.getInputStream()));
+					while ((s = br.readLine()) != null)
+						System.out.println("line: " + s);
+					p.waitFor();
+					System.out.println ("exit: " + p.exitValue());
+					p.destroy();
+				} catch (Exception ex) {}
+			}
+		
 		if(e.getSource().equals(botonUbuntu)){
-
-			//String nombre = caja.getText();                                 // obtenemos el contenido de la caja de texto
-			//JOptionPane.showMessageDialog(this, "Has seleccionado Ubuntu");    // mostramos un mensaje (frame, mensaje)
+			String user = "root";
+			String password = "temporal";
+			String host = "192.168.0.20";
+			int port = 22;
+			Session session = null;
+		    ChannelExec channel = null;
+		    
+		    try {
+		        session = new JSch().getSession(user, host, port);
+		        session.setPassword(password);
+		        session.setConfig("StrictHostKeyChecking", "no");
+		        System.out.println("Establishing Connection...");
+		        session.connect();
+		        System.out.println("Connection established.");
+		        
+		        channel = (ChannelExec) session.openChannel("exec");
+		        channel.setCommand("xe vm-start uuid=66852cce-4284-0697-cbe2-0aed6fe84ffd");
+		        ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+		        channel.setOutputStream(responseStream);
+		        System.out.println("Crating SFTP Channel.");
+		        channel.connect();
+		        System.out.println("SFTP Channel created.");
+		        
+		        while (channel.isConnected()) {
+		            Thread.sleep(100);
+		        }
+		        
+		        String responseString = new String(responseStream.toByteArray());
+		        System.out.println(responseString);
+		        channel.disconnect();
+		        session.disconnect();
+		    } catch(Exception ex){
+		    	
+		    }
 			String s;
-	        Process p;
-	        try {
-	            p = Runtime.getRuntime().exec("remmina -c /home/mario/.local/share/remmina/centOS.remmina");
-	            BufferedReader br = new BufferedReader(
-	                new InputStreamReader(p.getInputStream()));
-	            while ((s = br.readLine()) != null)
-	                System.out.println("line: " + s);
-	            p.waitFor();
-	            System.out.println ("exit: " + p.exitValue());
-	            p.destroy();
-	        } catch (Exception ex) {}
-
+			Process p;
+			try {
+				Thread.sleep(30000);
+				p = Runtime.getRuntime().exec("remmina -c /home/mario/.local/share/remmina/centOS.remmina");
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(p.getInputStream()));
+				while ((s = br.readLine()) != null)
+					System.out.println("line: " + s);
+				p.waitFor();
+				System.out.println ("exit: " + p.exitValue());
+				p.destroy();
+			} catch (Exception ex) {}
+			    
 		}
 	}
 
 	public static void main(String[] args) {
-		Ventana V = new Ventana();      // creamos una ventana
-		V.setVisible(true);             // hacemos visible la ventana creada
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Ventana window = new Ventana();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 }
